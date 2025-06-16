@@ -1,0 +1,58 @@
+name: CI pipeline
+
+on:
+  pull_request:
+    branches:
+      - develop
+      - main
+      - release/**
+
+jobs:
+  build-test:
+    runs-on: ubuntu-24.04
+    permissions:
+      contents: read
+
+    steps:
+      # 1) 소스 체크아웃
+      - uses: actions/checkout@v4
+
+      # 2) JDK 설치 + Gradle 캐싱
+      - name: Set up JDK 21
+        uses: actions/setup-java@v4
+        with:
+          distribution: 'temurin'
+          java-version: 21
+          cache: 'gradle'
+
+      # 3) Gradle Wrapper 권한 부여
+      - name: Grant execute permission for gradlew
+        run: chmod +x ./gradlew
+
+      # 4) 단위 테스트
+      - name: Run unit tests
+        run: ./gradlew --no-daemon test
+
+      # 테스트 리포트 업로드
+      - name: Upload Test Report (HTML)
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-report
+          path: build/reports/tests/test/**/*.html
+      - name: Upload Test Report (XML)
+        uses: actions/upload-artifact@v4
+        with:
+          name: junit-xml-report
+          path: build/test-results/test/**/*.xml
+
+      # 5) 빌드(JAR 파일 생성)
+      - name: Build executable jar
+        run: ./gradlew --no-daemon bootJar -x test --stacktrace
+
+      # 빌드 실패 시 로그 업로드
+      - name: Upload Build Logs on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-logs
+          path: build/reports/
