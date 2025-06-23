@@ -3,7 +3,9 @@ name: generate-plantuml-diagrams
 on:
   pull_request:
     branches: [develop]
-    paths: ['document/puml/**/*.puml']
+    paths:
+      - 'document/puml/*.puml'
+      - 'document/puml/**/*.puml'
   workflow_dispatch:
     inputs:
       regenerate_all:
@@ -49,4 +51,6 @@ jobs:
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore(diagram): auto-generate SVGs [skip ci]"
-          file_pattern: document/puml/**/*.svg
+          file_pattern: |
+            document/puml/*.svg
+            document/puml/**/*.svg
