@@ -10,16 +10,11 @@ import org.springframework.context.annotation.Configuration;
 public class SwaggerConfig {
 
   @Bean
-  public OpenAPI openAPI(){
-    return new OpenAPI()
-        .components(new Components())
-        .info(apiInfo());
+  public OpenAPI openAPI() {
+    return new OpenAPI().components(new Components()).info(apiInfo());
   }
 
-  private Info apiInfo(){
-    return new Info()
-        .title("Simple Board API")
-        .description("Simple Board API")
-        .version("1.0.0");
+  private Info apiInfo() {
+    return new Info().title("Simple Board API").description("Simple Board API").version("1.0.0");
   }
 }
