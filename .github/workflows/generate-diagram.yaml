@@ -1,0 +1,50 @@
+name: generate-plantuml-diagrams
+
+on:
+  pull_request:
+    branches: [develop]
+    paths: ['document/puml/**/*.puml']
+  workflow_dispatch:
+    inputs:
+      regenerate_all:
+        description: '모든 SVG를 강제로 다시 생성할까요?'
+        required: false
+        default: 'false'
+        type: choice
+        options: ['true', 'false']
+
+jobs:
+  plantuml:
+    runs-on: ubuntu-latest
+
+    steps:
+      # 1) 코드 체크아웃
+      - uses: actions/checkout@v4
+
+      # 2) JDK 설치
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+
+      # 3) Graphviz + PlantUML JAR 내려받기
+      - name: Install Graphviz & PlantUML
+        run: |
+          sudo apt-get update -y
+          sudo apt-get install -y graphviz
+          curl -sSL -o plantuml.jar \
+            https://github.com/plantuml/plantuml/releases/download/v1.2025.3/plantuml-1.2025.3.jar
+
+      # 4) .puml → .svg
+      - name: Render .puml ➜ .svg
+        run: |
+          find document/puml -name '*.puml' -print0 \
+          | xargs -0 java -jar plantuml.jar \
+              -graphvizdot /usr/bin/dot -tsvg -overwrite -v
+
+      # 5) 변경된 .svg 커밋
+      - name: Commit generated SVGs
+        uses: stefanzweifel/git-auto-commit-action@v5
+        with:
+          commit_message: "chore(diagram): auto-generate SVGs [skip ci]"
+          file_pattern: document/puml/**/*.svg
