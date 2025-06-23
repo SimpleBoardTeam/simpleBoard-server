@@ -1,0 +1,6 @@
+@startuml
+package "board"{
+    entity Board <<Aggregate Root>>{
+    }
+}
+@enduml

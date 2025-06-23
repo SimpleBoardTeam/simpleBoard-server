@@ -1,0 +1,4 @@
+@startuml
+entity Member <<Aggregate Root>>{
+}
+@enduml

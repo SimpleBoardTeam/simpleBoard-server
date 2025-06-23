@@ -1,0 +1,80 @@
+@startuml
+
+package "context map" {
+    package "board context"{
+        package "board"{
+            entity Board <<Aggregate Root>>{
+            }
+        }
+
+        package "post"{
+            abstract Post <<Aggregate Root>>{
+            }
+            class GuestPost <<ImplClass>>{
+            }
+            class MemberPost <<ImplClass>>{
+            }
+            '해시태그
+            entity HashTag <<Entity>>{
+            }
+            struct Tags <<Value Object>>{
+            }
+            Post -- Tags
+            Tags "1" --> "N" HashTag
+            '좋아요
+            entity PostLike <<Entity>>{
+            }
+            struct Likes <<Value Object>>{
+            }
+            Post -- Likes
+            Likes "1" --> "N" PostLike
+        }
+
+        package "comment"{
+            abstract Comment <<Aggregate Root>>{
+            }
+            class GuestComment <<ImplClass>>{
+            }
+            class MemberComment <<ImplClass>>{
+            }
+        }
+
+        GuestPost --|> Post
+        MemberPost --|> Post
+        GuestComment --|> Comment
+        MemberComment --|> Comment
+
+    }
+
+    package "member context"{
+        entity Member <<Aggregate Root>>{
+        }
+    }
+
+    package "board manager context"{
+        package "board manager"{
+            entity BoardManager <<Aggregate Root>>{
+            }
+            entity Role <<Entity>>{
+            }
+            struct Roles <<Value Object>>{
+            }
+            struct Members <<Value Object>>{
+            }
+        }
+
+        BoardManager -- Roles
+        BoardManager -- Members
+        Members "1" ..> "N" Member
+        Roles "1" --> "N" Role
+    }
+
+    Board <.. Post
+    MemberPost ..> Member
+    PostLike ..> Member
+    MemberComment ..> Member
+    Comment ..> Post
+    Comment --> Comment
+
+}
+@enduml

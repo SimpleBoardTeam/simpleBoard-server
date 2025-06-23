@@ -1,0 +1,16 @@
+@startuml
+package "board manager"{
+    entity BoardManager <<Aggregate Root>>{
+    }
+    entity Role <<Entity>>{
+    }
+    struct Roles <<Value Object>>{
+    }
+    struct Members <<Value Object>>{
+    }
+}
+
+BoardManager -- Roles
+BoardManager -- Members
+Roles "1" --> "N" Role
+@enduml

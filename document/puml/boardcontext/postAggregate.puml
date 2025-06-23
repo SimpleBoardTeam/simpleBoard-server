@@ -1,0 +1,66 @@
+@startuml
+
+package "post" {
+    abstract Post <<Aggregate Root>>{
+        +Long :\t\t postId
+        +Board :\t\t board  \t//외부 BC 키
+        +Title :\t\t title
+        +Content :\t\t content
+        +Long :\t\t viewCnt
+        +DateTime :\t createdAt
+        +DateTime :\t updatedAt
+        +Boolean :\t\t isDeleted
+        --
+        +write()
+        +edit()
+        +softDelete()
+        +increaseView()
+        +toggleLike(MemberId)
+        +updateTitle(String) : title.updateTitle(String)
+    }
+    class GuestPost <<ImplClass>>{
+        +String : nickname
+        +String : password
+    }
+    class MemberPost <<ImplClass>>{
+        +Member : member
+    }
+
+    'VO
+    struct Board <<ValueObject>>{
+        Long : boardId
+    }
+    Post -- Board
+
+
+    '해시태그
+    entity HashTag <<Entity>>{
+        +String tag
+    }
+    struct Tags <<Value Object>>{
+        +HashTag[] : tags
+        --
+        +checkTags(String)
+    }
+    Post -- Tags
+    Tags "1" --> "N" HashTag
+
+
+    '좋아요
+    entity PostLike <<Entity>>{
+        +Vid :\t vid
+        +Member :\t member
+    }
+    struct Likes <<Value Object>>{
+        +PostLike[] : likes
+        --
+        +isLiked(Vid, Member)
+    }
+    Post -- Likes
+    Likes "1" --> "N" PostLike
+
+    '공통
+    GuestPost --|> Post
+    MemberPost --|> Post
+}
+@enduml
