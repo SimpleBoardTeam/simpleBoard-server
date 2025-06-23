@@ -16,6 +16,8 @@ on:
 jobs:
   plantuml:
     runs-on: ubuntu-latest
+    permissions:
+      contents: write
 
     steps:
       # 1) 코드 체크아웃
