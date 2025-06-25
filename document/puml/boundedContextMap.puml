@@ -39,6 +39,11 @@ package "context map" {
             }
         }
 
+        package "userBoardRole"{
+            abstract UserBoardRole <<Aggregate Root>>{
+            }
+        }
+
         GuestPost --|> Post
         MemberPost --|> Post
         GuestComment --|> Comment
@@ -51,25 +56,10 @@ package "context map" {
         }
     }
 
-    package "board manager context"{
-        package "board manager"{
-            entity BoardManager <<Aggregate Root>>{
-            }
-            entity Role <<Entity>>{
-            }
-            struct Roles <<Value Object>>{
-            }
-            struct Members <<Value Object>>{
-            }
-        }
-
-        BoardManager -- Roles
-        BoardManager -- Members
-        Members "1" ..> "N" Member
-        Roles "1" --> "N" Role
-    }
-
+    Board <.. userBoardRole
     Board <.. Post
+
+    userBoardRole ..> Member
     MemberPost ..> Member
     PostLike ..> Member
     MemberComment ..> Member
