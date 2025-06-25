@@ -1,4 +1,37 @@
 @startuml
-entity Member <<Aggregate Root>>{
+package "member" {
+  entity Member <<Aggregate Root>> {
+    +Long : \t\t memberId
+    +Nickname : \t nickname
+    +Gender : \t\t gender
+    +BirthYear : \t birthYear
+    +DateTime : \t signUpDate
+    --
+    +create()
+    +withdraw()
+    +updateNickname(String) : nickname.updateNickname(String)
+}
+
+enum Gender {
+    MALE
+    FEMALE
+}
+
+class Nickname <<Value Object>> {
+    +String : nickname
+    --
+    +validate()
+    +updateNickname(newNickname : String) : Nickname
+}
+
+class BirthYear <<Value Object>> {
+    +String : birthYear
+    --
+    +validate()
+}
+
+Member -- Gender
+Member -- Nickname
+Member -- BirthYear
 }
 @enduml
