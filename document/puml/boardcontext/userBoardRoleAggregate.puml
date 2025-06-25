@@ -1,6 +1,11 @@
 @startuml
-package "board manager"{
+package "UserBoardRole"{
     entity BoardManager <<Aggregate Root>>{
+            +Post :\t\t post
+            +Content :\t\t content
+            +DateTime :\t createdAt
+            +DateTime :\t updatedAt
+            +Boolean :\t\t isDeleted
     }
     entity Role <<Entity>>{
     }
