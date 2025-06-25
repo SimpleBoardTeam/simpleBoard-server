@@ -12,6 +12,7 @@ jobs:
     runs-on: ubuntu-24.04
     permissions:
       contents: read
+      statuses: write
 
     steps:
       # 1) 소스 체크아웃

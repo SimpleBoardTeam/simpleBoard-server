@@ -3,8 +3,9 @@ name: remind pr review
 on:
   workflow_dispatch:
   schedule:
-    - cron: '0 1 * * 1-5' # 평일 오전 10시마다 수행
-    - cron: '0 5 * * 0-6' # 매일 오후 2시마다 수행
+    - cron: '0 1 * * 1-5'   # 평일 오전 10시마다 수행
+    - cron: '0 10 * * 1-5'  # 평일 오후 7시
+    - cron: '0 5 * * 0,6'   # 주말 오후 2시
 
 jobs:
   cron:

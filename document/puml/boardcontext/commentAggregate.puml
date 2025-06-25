@@ -1,0 +1,22 @@
+@startuml
+package "comment"{
+    abstract Comment <<Aggregate Root>>{
+        +Post :\t\t post
+        +Content :\t\t content
+        +DateTime :\t createdAt
+        +DateTime :\t updatedAt
+        +Boolean :\t\t isDeleted
+    }
+    class GuestComment <<ImplClass>>{
+    }
+    class MemberComment <<ImplClass>>{
+    }
+    GuestComment --|> Comment
+    MemberComment --|> Comment
+
+    struct Post <<Value Object>>{
+        +Long : postId
+    }
+    Comment -- Post
+}
+@enduml
