@@ -1,21 +1,37 @@
 @startuml
-package "UserBoardRole"{
-    entity BoardManager <<Aggregate Root>>{
-            +Post :\t\t post
-            +Content :\t\t content
-            +DateTime :\t createdAt
-            +DateTime :\t updatedAt
-            +Boolean :\t\t isDeleted
+package "userBoardRole" {
+    entity UserBoardRole <<Aggregate Root>> {
+        +Member : \t\t member
+        +Board : \t\t board \t//외부 BC 키
+        +Role : \t\t role
+        +DateTime : \t assignedAt
+        --
+        +createManager(board : Board, creatorId : MemberId) : UserBoardRole
+        +grantRole(to : MemberId, role : Role)
+        +transferRole(to : MemberId)
+        +revokeRole()
+        +assertRole(targetRole : Role)
+        +assertOwner(memberId : MemberId)
+        +assertBelongsTo(board : Board)
     }
-    entity Role <<Entity>>{
-    }
-    struct Roles <<Value Object>>{
-    }
-    struct Members <<Value Object>>{
-    }
-}
 
-BoardManager -- Roles
-BoardManager -- Members
-Roles "1" --> "N" Role
+    enum Role {
+        MANAGER
+        EDITOR
+    }
+
+    'VO
+    class Member <<Value Object>> {
+        +Long : memberId
+    }
+
+    class Board <<Value Object>> {
+        +Long : boardId
+    }
+
+
+    UserBoardRole -- Role
+    UserBoardRole -- Board
+    UserBoardRole -- Member
+}
 @enduml
