@@ -1,6 +1,20 @@
 @startuml
-package "board"{
-    entity Board <<Aggregate Root>>{
+package "board" {
+    entity Board <<Aggregate Root>> {
+        +Long : \t\t boardId
+        +BoardName : \t BoardName
+        +creatorId : \t MemberId
+        +createdAt : \t DateTime
+        --
+        +create(boardName : String, creatorId : MemberId) : Board
+        +delete()
+        +validateBoardName() : BoardName.validate()
     }
+    'VO
+    class BoardName <<Value Object>> {
+        +String : boardName
+        --
+        +validate()
+     }
 }
 @enduml
