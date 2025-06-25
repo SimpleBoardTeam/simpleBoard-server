@@ -3,7 +3,7 @@
 package "context map" {
     package "board context"{
         package "board"{
-            entity Board <<Aggregate Root>>{
+            abstract Board <<Aggregate Root>>{
             }
         }
 
@@ -52,14 +52,37 @@ package "context map" {
     }
 
     package "member context"{
-        entity Member <<Aggregate Root>>{
+        package "member"{
+          abstract Member <<Aggregate Root>>{
+          }
+          struct NickName <<Value Object>>{
+          }
+          struct BirthYear <<Value Object>>{
+          }
+          Member -- NickName
+          Member -- BirthYear
         }
     }
 
-    Board <.. userBoardRole
+    package "auth context"{
+        package "Auth" {
+            abstract AuthCredential <<Aggregate Root>>{
+            }
+            struct Email <<Value Object>>{
+            }
+            struct Password <<Value Object>>{
+            }
+            AuthCredential -- Email
+            AuthCredential -- Password
+        }
+    }
+
+
+    Board <.. UserBoardRole
     Board <.. Post
 
-    userBoardRole ..> Member
+    AuthCredential ..> Member
+    UserBoardRole ..> Member
     MemberPost ..> Member
     PostLike ..> Member
     MemberComment ..> Member
