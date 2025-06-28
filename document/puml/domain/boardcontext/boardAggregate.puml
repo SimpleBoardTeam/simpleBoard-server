@@ -1,10 +1,10 @@
 @startuml
 package "board" {
     entity Board <<Aggregate Root>> {
-        +Long : \t\t boardId
-        +BoardName : \t BoardName
-        +creatorId : \t MemberId
-        +createdAt : \t DateTime
+        +Long boardId
+        +BoardName boardName
+        +CreatorId memberId
+        +createdAt dateTime
         --
         +create(boardName : String, creatorId : MemberId) : Board
         +delete()

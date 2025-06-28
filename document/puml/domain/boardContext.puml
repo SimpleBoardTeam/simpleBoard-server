@@ -6,7 +6,6 @@ package "board context"{
     !include boardcontext/boardAggregate.puml
     !include boardcontext/postAggregate.puml
     !include boardcontext/commentAggregate.puml
-    !include boardcontext/userBoardRoleAggregate.puml
 
     post.Board ..> board.Board
     comment.Post ..> post.Post
