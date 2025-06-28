@@ -70,7 +70,10 @@ package "context map" {
             }
             struct Email <<Value Object>>{
             }
-            struct Password <<Value Object>>{
+
+            struct Roles <<Value Object>>{
+            }
+            struct Managers <<Value Object>>{
             }
             AuthCredential -- Email
             AuthCredential -- Password

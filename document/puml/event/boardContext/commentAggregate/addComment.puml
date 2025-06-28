@@ -1,0 +1,42 @@
+@startuml addCommentSecq
+title Add comment
+
+actor Client
+participant CommentController
+participant CommentCommandService
+participant PostQueryRepository
+participant CommentRepository
+entity      Comment
+participant DomainEventPublisher
+participant CommentCreatedHandler
+participant PostReadCacheRepository
+database Cache
+
+Client -> CommentController : POST\n/comments?postId={postId}
+CommentController -> CommentCommandService : createComment(userId, postId, cmd)
+
+CommentCommandService -> PostQueryRepository : existById(postId)
+alt Post exist
+PostQueryRepository --> CommentCommandService : true
+else Post not exist
+PostQueryRepository -> Client : POST_NOT_EXIST
+end
+
+CommentCommandService -> Comment : Comment.write(userId, PostId, cmd)
+activate Comment
+Comment --> CommentCommandService : Comment Created
+deactivate Comment
+
+CommentCommandService -> CommentRepository : save(Comment)
+CommentRepository --> CommentCommandService : CommentDetailDTO
+
+CommentCommandService -> DomainEventPublisher : publish(CommentCreatedEvent)
+
+CommentCommandService --> CommentController : CommentCreateResult
+CommentController --> Client :  201 Created + CommentCreateResponse
+
+DomainEventPublisher -> CommentCreatedHandler : CommentCreatedEvent
+CommentCreatedHandler -> PostReadCacheRepository : increaseCommentCount(postId)
+PostReadCacheRepository -> Cache : INCR post:{postId}:commentCount
+
+@enduml
