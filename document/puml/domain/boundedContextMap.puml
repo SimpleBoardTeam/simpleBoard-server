@@ -59,13 +59,13 @@ package "context map" {
             }
             struct Roles <<Value Object>>{
             }
-            struct Members <<Value Object>>{
+            struct Managers <<Value Object>>{
             }
         }
 
         BoardManager -- Roles
-        BoardManager -- Members
-        Members "1" ..> "N" Member
+        BoardManager -- Managers
+        Managers "1" ..> "N" Member
         Roles "1" --> "N" Role
     }
 
