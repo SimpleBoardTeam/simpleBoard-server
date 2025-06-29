@@ -1,0 +1,19 @@
+@startuml
+actor User
+participant MemberController
+participant MemberService
+participant MemberQueryRepository
+entity Member
+
+User -> MemberController : GET /users/me (Authorization 헤더 포함)
+MemberController -> MemberService : getMyInfo(memberId)
+
+MemberService -> MemberQueryRepository : findById(memberId)
+MemberQueryRepository --> MemberService : Member
+
+MemberService -> Member : getProfile() \n(nickname, gender, birthYear, signUpDate)
+Member --> MemberService : MemberProfileResponse
+
+MemberService --> MemberController : MemberProfileResponse
+MemberController --> User : HTTP 200 OK + JSON 응답
+@enduml

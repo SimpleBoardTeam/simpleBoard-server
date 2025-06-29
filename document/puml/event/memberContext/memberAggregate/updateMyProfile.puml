@@ -1,0 +1,26 @@
+@startuml
+actor User
+participant MemberController
+participant MemberService
+participant MemberCommandRepository
+participant MemberQueryRepository
+entity Member
+
+User -> MemberController : PATCH /users/me (nickname, password)
+MemberController -> MemberService : updateMyInfo(memberId, updateRequest)
+
+MemberService -> MemberQueryRepository : findById(memberId)
+MemberQueryRepository --> MemberService : Member
+
+alt 닉네임이 존재할 경우
+    MemberService -> Member : updateNickname(newNickname)
+end
+
+alt 비밀번호가 존재할 경우
+    MemberService -> Member : updatePassword(newPassword)
+end
+
+MemberService -> MemberCommandRepository : save(member)
+MemberService --> MemberController : 성공 응답
+MemberController --> User : HTTP 200 OK
+@enduml

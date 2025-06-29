@@ -2,13 +2,13 @@
 
 package "board context"{
 
-
     !include boardcontext/boardAggregate.puml
     !include boardcontext/postAggregate.puml
     !include boardcontext/commentAggregate.puml
+    !include boardcontext/permissionPolicyAggregate.puml
 
     post.Board ..> board.Board
     comment.Post ..> post.Post
-
+    permissionPolicy.PermissionPolicy ..> board.Board
 }
 @enduml
