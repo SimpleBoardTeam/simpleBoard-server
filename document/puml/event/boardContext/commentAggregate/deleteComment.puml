@@ -1,0 +1,44 @@
+@startuml deleteCommentSeq
+title Delete comment
+
+actor Client
+participant CommentController
+participant CommentCommandService
+participant CommentRepository
+entity      Comment
+participant DomainEventPublisher
+participant CommentDeletedHandler
+participant PostReadCacheRepository
+database Cache
+
+Client -> CommentController : DELETE\n/comments/{commentId}
+'--- Controller
+CommentController -> CommentCommandService : createComment(Visitor, commentId, cmd)
+'--- Service
+CommentCommandService -> CommentRepository : findById(commentId)
+'--- Repository
+activate Comment
+CommentRepository --> CommentCommandService : Comment
+CommentCommandService -> Comment : canDelete(Visitor, cmd)
+alt Enalbe to delete
+Comment --> CommentCommandService : true
+
+CommentCommandService -> Comment : softDelete()
+CommentCommandService -> CommentRepository : save(Comment)
+deactivate Comment
+
+'--- Event
+CommentCommandService -> DomainEventPublisher : CommentDeletedEvent
+
+
+CommentCommandService --> CommentController : CommentDeleteResult
+CommentController --> Client :  200 OK + CommentDeleteResponse
+else Unable to delete
+Comment --> Client : 403 FORBIDDEN
+end
+
+DomainEventPublisher -> CommentDeletedHandler : CommentDeletedEvent
+CommentDeletedHandler -> PostReadCacheRepository : decreaseCommentCount(postId)
+PostReadCacheRepository -> Cache : DECR post:{postId}:commentCount
+
+@enduml
