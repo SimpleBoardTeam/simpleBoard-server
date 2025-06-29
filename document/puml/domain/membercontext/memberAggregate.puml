@@ -1,11 +1,11 @@
 @startuml
 package "member" {
   entity Member <<Aggregate Root>> {
-    +Long : \t\t memberId
-    +Nickname : \t nickname
-    +Gender : \t\t gender
-    +BirthYear : \t birthYear
-    +DateTime : \t signUpDate
+    +Long memberId
+    +Nickname nickname
+    +Gender gender
+    +BirthYear birthYear
+    +LocalDateTime signUpDate
     --
     +create()
     +withdraw()
