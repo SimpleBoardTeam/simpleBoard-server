@@ -1,15 +1,15 @@
 @startuml
 actor User
 participant MemberController
-participant MemberService
+participant MemberQueryService
 participant MemberQueryRepository
 
 User -> MemberController : GET /user/exists/nickname={userNickname}
-MemberController -> MemberService : isNicknameExists(userNickname)
+MemberController -> MemberQueryService : existsByNickname(nickname)
 
-MemberService -> MemberQueryRepository : existsByNickname(userNickname)
-MemberQueryRepository --> MemberService : true / false
+MemberQueryService -> MemberQueryRepository : existsByNickname(nickname)
+MemberQueryRepository --> MemberQueryService : true / false
 
-MemberService --> MemberController : true / false
+MemberQueryService --> MemberController : true / false
 MemberController --> User : HTTP 200 OK + JSON (exists: true / false)
 @enduml
