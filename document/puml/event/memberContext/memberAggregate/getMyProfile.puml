@@ -4,6 +4,8 @@ participant MemberController
 participant MemberQueryService
 participant MemberQueryRepository
 entity Member
+participant MemberProfileMapper
+
 
 User -> MemberController : GET /users/me
 MemberController -> MemberQueryService : getProfileById(memberId)
@@ -13,6 +15,9 @@ MemberQueryRepository --> MemberQueryService : Member
 
 MemberQueryService -> Member : toProfileResult()
 Member --> MemberQueryService : MemberProfileResult
+
+MemberQueryService -> MemberProfileMapper : toResponse(MemberProfileResult)
+MemberProfileMapper --> MemberQueryService : MemberProfileResponse
 
 MemberQueryService --> MemberController : MemberProfileResponse
 MemberController --> User : HTTP 200 OK + JSON 응답
