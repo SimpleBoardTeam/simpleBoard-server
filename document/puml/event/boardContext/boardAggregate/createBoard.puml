@@ -1,25 +1,27 @@
 @startuml
 actor Client
 participant BoardController
-participant BoardService
+participant BoardCommandService
 participant BoardCommandRepository
 Entity Board
+participant DomainEventPublisher
+
 
 Client -> BoardController : POST /board \n(boardCreateRequest)
 
-BoardController -> BoardService : createBoard \n(boardCreateRequest, userId)
+BoardController -> BoardCommandService : createBoard \n(boardCreateCommand, userId)
 
-BoardService -> Board : Board.create(boardCreateRequest)
+BoardCommandService -> Board : Board.create(boardCreateCommand) \n// Factory 패턴 도입 여부 고민 중
 
 activate Board
-Board --> BoardService : Board created
+Board --> BoardCommandService : Board
 deactivate Board
 
-BoardService -> BoardCommandRepository : save(board)
-BoardCommandRepository --> BoardService : BoardId
+BoardCommandService -> BoardCommandRepository : save(board)
+BoardCommandRepository --> BoardCommandService : BoardId
 
-BoardService -> DomainEventPublisher : publish(BoardCreatedEvent)
+BoardCommandService -> DomainEventPublisher : publish(BoardCreatedEvent)
 
-BoardService --> BoardController : BoardId
+BoardCommandService --> BoardController : BoardId
 BoardController --> Client : HTTP 201 + BoardId
 @enduml
