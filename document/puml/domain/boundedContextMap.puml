@@ -5,6 +5,12 @@ package "context map" {
         package "board"{
             abstract Board <<Aggregate Root>>{
             }
+            struct BoardName <<Value Object>>{
+            }
+            struct Creator <<Value Object>>{
+            }
+            BoardName -- Board
+            Creator -- Board
         }
 
         package "post"{
@@ -39,11 +45,6 @@ package "context map" {
             }
         }
 
-        package "userBoardRole"{
-            abstract UserBoardRole <<Aggregate Root>>{
-            }
-        }
-
         GuestPost --|> Post
         MemberPost --|> Post
         GuestComment --|> Comment
@@ -64,33 +65,39 @@ package "context map" {
         }
     }
 
-    package "auth context"{
-        package "Auth" {
-            abstract AuthCredential <<Aggregate Root>>{
-            }
-            struct Email <<Value Object>>{
+  package "permission context" {
+        package "permission" {
+            abstract PermissionPolicy <<Aggregate Root>> {
             }
 
-            struct Roles <<Value Object>>{
+            entity ManagerAssignment <<Entity>> {
             }
-            struct Managers <<Value Object>>{
+
+            struct Role <<Value Object>> {
             }
-            AuthCredential -- Email
-            AuthCredential -- Password
+
+            enum RoleType {
+            }
+
+            enum Permission {
+            }
+
+            Role "1" --> "N" Permission
+
+            PermissionPolicy "1" -- "N" ManagerAssignment
+            ManagerAssignment "N" -- "1" Role
+            Role -- RoleType
         }
     }
 
-
-    Board <.. UserBoardRole
     Board <.. Post
 
-    AuthCredential ..> Member
-    UserBoardRole ..> Member
     MemberPost ..> Member
     PostLike ..> Member
     MemberComment ..> Member
     Comment ..> Post
     Comment --> Comment
+    Board ..> PermissionPolicy
 
 }
 @enduml
