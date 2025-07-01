@@ -1,26 +1,32 @@
 @startuml
 actor User
 participant MemberController
-participant MemberService
+participant MemberCommandService
 participant MemberCommandRepository
-participant MemberQueryRepository
 entity Member
 
+participant DomainEventPublisher
+
+
 User -> MemberController : PATCH /users/me (nickname, password)
-MemberController -> MemberService : updateMyInfo(memberId, updateRequest)
+MemberController -> MemberCommandService : updateMemberInfo(memberId, updateRequest)
 
-MemberService -> MemberQueryRepository : findById(memberId)
-MemberQueryRepository --> MemberService : Member
+MemberCommandService -> MemberCommandRepository : findById(memberId)
+MemberCommandRepository --> MemberCommandService : Member
 
-alt 닉네임이 존재할 경우
-    MemberService -> Member : updateNickname(newNickname)
+alt newNickname != null
+    MemberCommandService -> Member : updateNickname(newNickname)
+    MemberCommandService -> DomainEventPublisher : publish(NicknameUpdatedEvent)
 end
 
-alt 비밀번호가 존재할 경우
-    MemberService -> Member : updatePassword(newPassword)
+alt newPassword != null
+    MemberCommandService -> Member : updatePassword(newPassword)
+    MemberCommandService -> DomainEventPublisher : publish(PasswordUpdatedEvent)
 end
 
-MemberService -> MemberCommandRepository : save(member)
-MemberService --> MemberController : 성공 응답
+MemberCommandService -> MemberCommandRepository : save(member)
+MemberCommandRepository -> MemberCommandService : memberId
+
+MemberCommandService --> MemberController : 성공 응답
 MemberController --> User : HTTP 200 OK
 @enduml
