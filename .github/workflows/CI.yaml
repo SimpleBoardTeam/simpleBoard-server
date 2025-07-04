@@ -52,8 +52,8 @@ jobs:
 
       # 3) Graphviz + PlantUML JAR 내려받기
       - name: Install Graphviz & PlantUML
-        if: needs.changes.outputs.puml_changed == 'true' ||                               # .puml을 포함하고 있는 pr에 대해서만 동작
-          (github.event_name == 'workflow_dispatch' && inputs.regenerate_svg == 'true')   #수동실행
+        if: needs.changes.outputs.puml_changed == 'true' ||
+          (github.event_name == 'workflow_dispatch' && inputs.regenerate_svg == 'true')   # .puml을 포함하고 있는 pr 혹은 수동실행에 대해서만 동작
         run: |
           sudo apt-get update -y
           sudo apt-get install -y graphviz
@@ -62,8 +62,8 @@ jobs:
 
       # 4) .puml → .svg
       - name: Render .puml ➜ .svg
-        if: needs.changes.outputs.puml_changed == 'true' ||                               # .puml을 포함하고 있는 pr에 대해서만 동작
-          (github.event_name == 'workflow_dispatch' && inputs.regenerate_svg == 'true')   #수동실행
+        if: needs.changes.outputs.puml_changed == 'true' ||
+          (github.event_name == 'workflow_dispatch' && inputs.regenerate_svg == 'true')   # .puml을 포함하고 있는 pr 혹은 수동실행에 대해서만 동작
         run: |
           find document/puml -name '*.puml' -print0 \
           | xargs -0 java -jar plantuml.jar \
@@ -71,14 +71,14 @@ jobs:
 
       # 5) 변경된 .svg 커밋
       - name: Commit generated SVGs
-        if: needs.changes.outputs.puml_changed == 'true' ||                               # .puml을 포함하고 있는 pr에 대해서만 동작
-          (github.event_name == 'workflow_dispatch' && inputs.regenerate_svg == 'true')   #수동실행
+        if: needs.changes.outputs.puml_changed == 'true' || 
+          (github.event_name == 'workflow_dispatch' && inputs.regenerate_svg == 'true')   # .puml을 포함하고 있는 pr 혹은 수동실행에 대해서만 동작
         uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: "chore(diagram): auto-generate SVGs"
           file_pattern: |
             document/puml/*.svg
-            document/puml/**/*.puml
+            document/puml/**/*.svg
 
   #################################################
   # 3) 단위 테스트
