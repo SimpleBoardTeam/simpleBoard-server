@@ -4,9 +4,9 @@ title Get comment list
 actor Client
 participant CommentQueryController
 participant CommentQueryService
-participant PostQueryRepository
+participant PostQueryRepository #Yellow
 participant CommentQueryRepository
-participant MemberFetchService
+participant "MemberFetchService\n(use internalAPI)" as MemberFetchService #GreenYellow
 
 Client -> CommentQueryController : GET\n/comments?postId={postId}&cursor={cursor}&size={size}
 CommentQueryController -> CommentQueryService : getCommentList(postId, Page)
@@ -38,8 +38,7 @@ note right of CommentQueryService
 <b>CommentListDTO</b>
 * Page
 * Slice<CommentDetail>
-end note
-note right of CommentQueryService
+
 <b>CommentDetail</b>
 * commentId
 * parentId
@@ -50,4 +49,13 @@ note right of CommentQueryService
 * createdAt
 end note
 
+note right of CommentQueryService
+<b>MemberSummaryResponseDTO</b>
+* List<MemberSummary>
+
+<b> MemberSummary</b>
+* memberId
+* nickname
+* profile image link(later)
+end note
 @enduml
