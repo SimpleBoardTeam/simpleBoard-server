@@ -1,0 +1,49 @@
+@startuml deletePostSeq
+title Delete Post
+
+actor Client
+participant PostCommandController
+participant PostCommandService
+participant PostRepository
+entity      Post
+participant DomainEventPublisher #skyblue
+
+Client -> PostCommandController : DELETE\n/posts/{postId}
+'--- Controller
+PostCommandController -> PostCommandService : deletePost(Visitor, postId, cmd)
+'--- Service
+PostCommandService -> PostRepository : findById(postId)
+'--- Repository
+activate Post
+PostRepository --> PostCommandService : Post
+PostCommandService -> Post : hasDeletePermission(Visitor, cmd)
+
+alt Enalbe to delete
+Post --> PostCommandService : true
+PostCommandService -> Post : softDelete()
+PostCommandService -> PostRepository : save(Post)
+deactivate Post
+'--- Event
+PostCommandService -> DomainEventPublisher : postDeletedEvent
+'--- Response
+PostCommandService --> PostCommandController : postDeleteResult
+PostCommandController --> Client :  200 OK + postDeleteResponse
+else Unable to delete
+Post --> Client : 403 FORBIDDEN
+end
+
+
+note right of PostCommandController
+<b>Visitor</b>
+* Member or Guest
+* visitorId
+* memberId
+end note
+note right of PostCommandController
+<b>cmd</b>
+* password
+end note
+
+'!include ../../../eventHandling/boardContext/commentAggregate/postDeletedHandle.puml
+
+@enduml
