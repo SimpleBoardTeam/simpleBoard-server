@@ -1,4 +1,4 @@
-@startuml PostDetailSeqWithCache
+@startuml getPostDetailSeq
 title Get post detailed
 actor Client
 participant PostQueryController
@@ -6,9 +6,8 @@ participant PostQueryService
 participant PostQueryRepository
 participant CommentQueryRepository #orange
 participant "DomainEventPublisher\n(async)" as DomainEventPublisher #skyblue
-participant ViewCountCacheHandler #skyblue
-participant "PostWriteCacheRepository\n(write cache)" as PostCacheRepository
-database    Cache
+participant PostViewCountIncrementHandler #skyblue
+participant PostViewCountRepository
 
 Client -> PostQueryController : GET /posts/{postId}?board={bname}
 PostQueryController -> PostQueryService : getPostDetailed(Visitor, postId, bname)
@@ -20,9 +19,8 @@ alt Post exists & not deleted
     PostQueryService -> DomainEventPublisher : publish(PostViewIncreasedEvent(postId))
     PostQueryService --> PostQueryController : PostDetailResult
     PostQueryController --> Client : 200 OK + PostDetailResponse
-    DomainEventPublisher --> ViewCountCacheHandler : PostViewIncreasedEvent
-    ViewCountCacheHandler -> PostCacheRepository : increaseViewCount(postId)
-    PostCacheRepository -> Cache : INCR post:{postId}:views
+    DomainEventPublisher --> PostViewCountIncrementHandler : PostViewIncreasedEvent
+    PostViewCountIncrementHandler -> PostViewCountRepository : increaseViewCount(postId)
 else Post not found
     PostQueryController --> Client : 404_POST_NOT_FOUND
 else Post deleted

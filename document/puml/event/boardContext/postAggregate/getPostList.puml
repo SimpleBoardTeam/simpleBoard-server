@@ -1,32 +1,29 @@
-@startuml PostListSeq
+@startuml getPostListSeq
 actor Client
 participant PostQueryController
 participant PostQueryService
 participant BoardQueryRepository #skyblue
 participant PostQueryRepository
-participant PostReadCacheRepository
+participant PostMetaInfoRepository
 
 Client -> PostQueryController : GET /posts\n?board={bname}\n&page={page}&size={size}\n&searchType={type}&keyword={kw}
 
-autonumber
 PostQueryController -> PostQueryService : getPostList(bname, Page, searchCond)
 
 PostQueryService -> BoardQueryRepository : findIdByBoardName(bname)
 alt Board exists
 BoardQueryRepository --> PostQueryService : boardId
-else Board not found
-autonumber  3.1
-  BoardQueryRepository --> Client : 404_BOARD_NOT_FOUND
-'  stop
-end
 
-autonumber 4
 PostQueryService -> PostQueryRepository : findList(boardId, Page, searchCond)
-PostQueryRepository -> PostReadCacheRepository : fetchCommentCounts(postIds)
-PostReadCacheRepository --> PostQueryRepository : List<CommentCount>
+PostQueryRepository -> PostMetaInfoRepository : fetchCommentCounts(postIds)
+PostMetaInfoRepository --> PostQueryRepository : List<CommentCount>
 PostQueryRepository --> PostQueryService : Slice<PostSummaryDTO>
 
 
 PostQueryService --> PostQueryController : PostListResult
 PostQueryController --> Client : 200 OK + PostListResponse
+else Board not found
+  BoardQueryRepository --> Client : 404_BOARD_NOT_FOUND
+'  stop
+end
 @enduml

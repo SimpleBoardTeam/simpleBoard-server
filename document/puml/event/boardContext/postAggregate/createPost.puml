@@ -4,7 +4,7 @@ actor Client
 participant PostController
 participant PostQueryService
 participant BoardQueryRepository
-participant PostRepository
+participant PostCommandRepository
 entity      Post
 participant DomainEventPublisher
 
@@ -19,8 +19,8 @@ activate Post
 Post --> PostQueryService : Post Created
 deactivate Post
 
-PostQueryService -> PostRepository : save(Post)
-PostRepository --> PostQueryService : PostId
+PostQueryService -> PostCommandRepository : save(Post)
+PostCommandRepository --> PostQueryService : PostId
 
 PostQueryService -> DomainEventPublisher : publish(PostCreatedEvent)
 

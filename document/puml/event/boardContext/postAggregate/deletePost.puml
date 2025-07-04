@@ -2,21 +2,21 @@
 title Delete Post
 
 actor Client
-participant PostController
+participant PostCommandController
 participant PostCommandService
 participant PostRepository
 entity      Post
 participant DomainEventPublisher
 
-Client -> PostController : DELETE\n/posts/{postId}
+Client -> PostCommandController : DELETE\n/posts/{postId}
 '--- Controller
-PostController -> PostCommandService : deletePost(Visitor, postId, cmd)
+PostCommandController -> PostCommandService : deletePost(Visitor, postId, cmd)
 '--- Service
 PostCommandService -> PostRepository : findById(commentId)
 '--- Repository
 activate Post
 PostRepository --> PostCommandService : Post
-PostCommandService -> Post : canDelete(Visitor, cmd)
+PostCommandService -> Post : hasDeletePermission(Visitor, cmd)
 
 alt Enalbe to delete
 Post --> PostCommandService : true
@@ -26,19 +26,19 @@ deactivate Post
 '--- Event
 PostCommandService -> DomainEventPublisher : postDeletedEvent
 '--- Response
-PostCommandService --> PostController : postDeleteResult
-PostController --> Client :  200 OK + postDeleteResponse
+PostCommandService --> PostCommandController : postDeleteResult
+PostCommandController --> Client :  200 OK + postDeleteResponse
 else Unable to delete
 Post --> Client : 403 FORBIDDEN
 end
 
-note right of PostController
+note right of PostCommandController
 <b>Visitor</b>
 * Member or Guest
 * visitorId
 * memberId
 end note
-note right of PostController
+note right of PostCommandController
 <b>cmd</b>
 * password
 end note
