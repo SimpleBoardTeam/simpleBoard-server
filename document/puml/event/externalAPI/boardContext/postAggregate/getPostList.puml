@@ -2,9 +2,11 @@
 actor Client
 participant PostQueryController
 participant PostQueryService
-participant BoardQueryRepository #skyblue
+participant BoardQueryRepository #yellow
 participant PostQueryRepository
 participant PostMetaInfoRepository
+
+title Get Post list
 
 Client -> PostQueryController : GET /posts\n?board={bname}\n&page={page}&size={size}\n&searchType={type}&keyword={kw}
 
@@ -24,6 +26,6 @@ PostQueryService --> PostQueryController : PostListResult
 PostQueryController --> Client : 200 OK + PostListResponse
 else Board not found
   BoardQueryRepository --> Client : 404_BOARD_NOT_FOUND
-'  stop
 end
+
 @enduml

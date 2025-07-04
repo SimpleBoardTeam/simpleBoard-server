@@ -6,13 +6,13 @@ participant PostCommandController
 participant PostCommandService
 participant PostRepository
 entity      Post
-participant DomainEventPublisher
+participant DomainEventPublisher #skyblue
 
 Client -> PostCommandController : DELETE\n/posts/{postId}
 '--- Controller
 PostCommandController -> PostCommandService : deletePost(Visitor, postId, cmd)
 '--- Service
-PostCommandService -> PostRepository : findById(commentId)
+PostCommandService -> PostRepository : findById(postId)
 '--- Repository
 activate Post
 PostRepository --> PostCommandService : Post
@@ -32,6 +32,7 @@ else Unable to delete
 Post --> Client : 403 FORBIDDEN
 end
 
+
 note right of PostCommandController
 <b>Visitor</b>
 * Member or Guest
@@ -43,5 +44,6 @@ note right of PostCommandController
 * password
 end note
 
+'!include ../../../eventHandling/boardContext/commentAggregate/postDeletedHandle.puml
 
 @enduml

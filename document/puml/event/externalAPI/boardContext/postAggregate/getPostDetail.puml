@@ -4,10 +4,8 @@ actor Client
 participant PostQueryController
 participant PostQueryService
 participant PostQueryRepository
-participant CommentQueryRepository #orange
-participant "DomainEventPublisher\n(async)" as DomainEventPublisher #skyblue
-participant PostViewCountIncrementHandler #skyblue
-participant PostViewCountRepository
+participant CommentQueryRepository #yellow
+participant DomainEventPublisher #skyblue
 
 Client -> PostQueryController : GET /posts/{postId}?board={bname}
 PostQueryController -> PostQueryService : getPostDetailed(Visitor, postId, bname)
@@ -16,16 +14,17 @@ PostQueryRepository --> PostQueryService : PostDetailDTO
 PostQueryService -> CommentQueryRepository : fetchCommentList(postId, page)
 CommentQueryRepository --> PostQueryService : CommentListDTO
 alt Post exists & not deleted
-    PostQueryService -> DomainEventPublisher : publish(PostViewIncreasedEvent(postId))
+    PostQueryService -> DomainEventPublisher : publish(PostDetailQueriedEvent(postId))
     PostQueryService --> PostQueryController : PostDetailResult
     PostQueryController --> Client : 200 OK + PostDetailResponse
-    DomainEventPublisher --> PostViewCountIncrementHandler : PostViewIncreasedEvent
-    PostViewCountIncrementHandler -> PostViewCountRepository : increaseViewCount(postId)
 else Post not found
     PostQueryController --> Client : 404_POST_NOT_FOUND
 else Post deleted
     PostQueryController --> Client : 410_POST_DELETED
 end
+
+'!include ../../../eventHandling/boardContext/postAggregate/PostDetailQueriedHandle.puml
+
 @enduml
 
 
