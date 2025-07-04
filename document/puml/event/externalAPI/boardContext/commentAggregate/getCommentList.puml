@@ -1,0 +1,61 @@
+@startuml getCommentListSeq
+title Get comment list
+
+actor Client
+participant CommentQueryController
+participant CommentQueryService
+participant PostQueryRepository #Yellow
+participant CommentQueryRepository
+participant "MemberFetchService\n(use internalAPI)" as MemberFetchService #GreenYellow
+
+Client -> CommentQueryController : GET\n/comments?postId={postId}&cursor={cursor}&size={size}
+CommentQueryController -> CommentQueryService : getCommentList(postId, Page)
+
+CommentQueryService -> PostQueryRepository : existById(postId)
+alt Post exist
+PostQueryRepository --> CommentQueryService : true
+CommentQueryService -> CommentQueryRepository : fetchCommentList(postId, Page)
+CommentQueryRepository --> CommentQueryService : CommentListDTO
+CommentQueryService -> MemberFetchService : fetchMemberSummary(MemberSummaryRequestDTO)
+MemberFetchService --> CommentQueryService : MemberSummaryResponseDTO
+
+CommentQueryService --> CommentQueryController : CommentListResult
+CommentQueryController --> Client :  200 OK + CommentListResponse
+
+else Post not exist
+PostQueryRepository --> CommentQueryService : false
+CommentQueryService --> Client : POST_NOT_EXIST
+end
+
+note right of CommentQueryController
+<b>Page</b>
+* page size
+* cursor(offset)
+* total page
+end note
+
+note right of CommentQueryService
+<b>CommentListDTO</b>
+* Page
+* Slice<CommentDetail>
+
+<b>CommentDetail</b>
+* commentId
+* parentId
+* userType
+* authorId
+* nickname
+* content
+* createdAt
+end note
+
+note right of CommentQueryService
+<b>MemberSummaryResponseDTO</b>
+* List<MemberSummary>
+
+<b> MemberSummary</b>
+* memberId
+* nickname
+* profile image link(later)
+end note
+@enduml

@@ -2,41 +2,38 @@
 title Add comment
 
 actor Client
-participant CommentController
+participant CommentCommandController
 participant CommentCommandService
-participant PostQueryRepository
-participant CommentRepository
+participant PostQueryRepository #yellow
+participant CommentCommandRepository
 entity      Comment
-participant DomainEventPublisher
-participant CommentCreatedHandler
-participant PostReadCacheRepository
-database Cache
+participant DomainEventPublisher #skyblue
 
-Client -> CommentController : POST\n/comments?postId={postId}
-CommentController -> CommentCommandService : createComment(userId, postId, cmd)
+
+Client -> CommentCommandController : POST\n/comments?postId={postId}
+CommentCommandController -> CommentCommandService : createComment(userId, postId, cmd)
 
 CommentCommandService -> PostQueryRepository : existById(postId)
 alt Post exist
 PostQueryRepository --> CommentCommandService : true
-else Post not exist
-PostQueryRepository -> Client : POST_NOT_EXIST
-end
 
 CommentCommandService -> Comment : Comment.write(userId, PostId, cmd)
 activate Comment
 Comment --> CommentCommandService : Comment Created
 deactivate Comment
 
-CommentCommandService -> CommentRepository : save(Comment)
-CommentRepository --> CommentCommandService : CommentDetailDTO
+CommentCommandService -> CommentCommandRepository : save(Comment)
+CommentCommandRepository --> CommentCommandService : CommentDetailDTO
 
 CommentCommandService -> DomainEventPublisher : publish(CommentCreatedEvent)
 
-CommentCommandService --> CommentController : CommentCreateResult
-CommentController --> Client :  201 Created + CommentCreateResponse
+CommentCommandService --> CommentCommandController : CommentCreateResult
+CommentCommandController --> Client :  201 Created + CommentCreateResponse
 
-DomainEventPublisher -> CommentCreatedHandler : CommentCreatedEvent
-CommentCreatedHandler -> PostReadCacheRepository : increaseCommentCount(postId)
-PostReadCacheRepository -> Cache : INCR post:{postId}:commentCount
+else Post not exist
+PostQueryRepository --> Client : POST_NOT_EXIST
+end
 
+'!include ../../../eventHandling/boardContext/postAggregate/CommentCreatedHandle.puml
+'
 @enduml
