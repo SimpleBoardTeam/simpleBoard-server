@@ -1,0 +1,20 @@
+@startuml
+actor User
+participant MemberController
+participant MemberCommandService
+participant MemberCommandRepository
+entity Member
+participant DomainEventPublisher
+
+User -> MemberController : DELETE /users/me
+MemberController -> MemberCommandService : withdrawMemberById(memberId)
+
+MemberCommandService -> MemberCommandRepository : findById(memberId)
+MemberCommandRepository --> MemberCommandService : Member
+MemberCommandService -> MemberCommandRepository : delete(member)
+
+MemberCommandService -> DomainEventPublisher : publish(MemberDeletedEvent)
+
+MemberCommandService --> MemberController : 탈퇴 성공
+MemberController --> User : HTTP 204 No Content
+@enduml

@@ -1,0 +1,32 @@
+@startuml
+actor User
+participant MemberController
+participant MemberCommandService
+participant MemberCommandRepository
+entity Member
+
+participant DomainEventPublisher
+
+
+User -> MemberController : PATCH /users/me (nickname, password)
+MemberController -> MemberCommandService : updateMemberInfo(memberId, updateRequest)
+
+MemberCommandService -> MemberCommandRepository : findById(memberId)
+MemberCommandRepository --> MemberCommandService : Member
+
+alt newNickname != null
+    MemberCommandService -> Member : updateNickname(newNickname)
+    MemberCommandService -> DomainEventPublisher : publish(NicknameUpdatedEvent)
+end
+
+alt newPassword != null
+    MemberCommandService -> Member : updatePassword(newPassword)
+    MemberCommandService -> DomainEventPublisher : publish(PasswordUpdatedEvent)
+end
+
+MemberCommandService -> MemberCommandRepository : save(member)
+MemberCommandRepository -> MemberCommandService : memberId
+
+MemberCommandService --> MemberController : 성공 응답
+MemberController --> User : HTTP 200 OK
+@enduml
