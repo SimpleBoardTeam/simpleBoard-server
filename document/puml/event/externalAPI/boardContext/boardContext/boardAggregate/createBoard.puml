@@ -1,0 +1,27 @@
+@startuml
+actor Client
+participant BoardController
+participant BoardCommandService
+participant BoardCommandRepository
+Entity Board
+participant DomainEventPublisher
+
+
+Client -> BoardController : POST /board \n(boardCreateRequest)
+
+BoardController -> BoardCommandService : createBoard \n(boardCreateCommand, userId)
+
+BoardCommandService -> Board : Board.create(boardCreateCommand) \n// Factory 패턴 도입 여부 고민 중
+
+activate Board
+Board --> BoardCommandService : Board
+deactivate Board
+
+BoardCommandService -> BoardCommandRepository : save(board)
+BoardCommandRepository --> BoardCommandService : BoardId
+
+BoardCommandService -> DomainEventPublisher : publish(BoardCreatedEvent)
+
+BoardCommandService --> BoardController : BoardId
+BoardController --> Client : HTTP 201 + BoardId
+@enduml

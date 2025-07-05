@@ -1,0 +1,24 @@
+@startuml
+actor User
+participant BoardController
+participant BoardQueryService
+participant BoardQueryRepository
+
+User -> BoardController : GET /boards? \npage={page}&size={size}&searchType={type}&keyword={kw}&nickname={nickname}
+BoardController -> BoardQueryService : getBoards(SearchCondition searchCondition)
+
+BoardQueryService -> BoardQueryRepository : findBoards(searchCondition)
+BoardQueryRepository --> BoardQueryService : BoardPageResult
+
+BoardQueryService --> BoardController : BoardListResponse
+
+BoardController --> User : HTTP 200 OK + JSON (게시글 목록)
+note right of BoardController
+<b>SearchCondition</b>
+* page : int
+* size : int
+* title : String
+1. nickname : String (작성자 닉네임)
+2. memberId : Long (만약 이 방식이면 nickname으로 Member B.C. 에서 가져와야 함)
+end note
+@enduml

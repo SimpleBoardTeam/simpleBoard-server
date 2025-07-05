@@ -1,0 +1,28 @@
+@startuml
+actor User
+participant BoardController
+participant BoardService
+participant PermissionContextAPI as "권한검사 API \n(외부 Bounded Context)"
+participant BoardRepository
+participant DomainEventPublisher
+
+User -> BoardController : DELETE /board/{boardId}
+BoardController -> BoardService : deleteBoard(boardId, userId)
+
+BoardService -> PermissionContextAPI : checkPermission(userId, boardId, DELETE_BOARD)
+PermissionContextAPI --> BoardService : true / false
+
+alt 권한 있음
+    BoardService -> BoardRepository : findById(boardId)
+    BoardRepository --> BoardService : Board
+
+    BoardService -> BoardRepository : delete(Board)
+    BoardService -> DomainEventPublisher : publish(BoardDeletedEvent)
+
+    BoardService --> BoardController : HTTP 200 OK
+else 권한 없음
+    BoardService --> BoardController : HTTP 403 Forbidden
+end
+
+BoardController --> User : HTTP 응답 반환
+@enduml
