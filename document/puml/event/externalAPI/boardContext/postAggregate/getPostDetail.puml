@@ -1,0 +1,30 @@
+@startuml getPostDetailSeq
+title Get post detailed
+actor Client
+participant PostQueryController
+participant PostQueryService
+participant PostQueryRepository
+participant CommentQueryRepository #yellow
+participant DomainEventPublisher #skyblue
+
+Client -> PostQueryController : GET /posts/{postId}?board={bname}
+PostQueryController -> PostQueryService : getPostDetailed(Visitor, postId, bname)
+PostQueryService -> PostQueryRepository : fetchDetailed(postId, bname)
+PostQueryRepository --> PostQueryService : PostDetailDTO
+PostQueryService -> CommentQueryRepository : fetchCommentList(postId, page)
+CommentQueryRepository --> PostQueryService : CommentListDTO
+alt Post exists & not deleted
+    PostQueryService -> DomainEventPublisher : publish(PostDetailQueriedEvent(postId))
+    PostQueryService --> PostQueryController : PostDetailResult
+    PostQueryController --> Client : 200 OK + PostDetailResponse
+else Post not found
+    PostQueryController --> Client : 404_POST_NOT_FOUND
+else Post deleted
+    PostQueryController --> Client : 410_POST_DELETED
+end
+
+'!include ../../../eventHandling/boardContext/postAggregate/PostDetailQueriedHandle.puml
+
+@enduml
+
+
