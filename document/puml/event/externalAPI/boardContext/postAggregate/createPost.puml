@@ -3,10 +3,10 @@ title createPost
 actor Client
 participant PostController
 participant PostQueryService
-participant BoardQueryRepository
-participant PostRepository
+participant BoardQueryRepository #yellow
+participant PostCommandRepository
 entity      Post
-participant DomainEventPublisher
+participant DomainEventPublisher #skyblue
 
 Client -> PostController : POST /posts\n(bname, page, size)
 PostController -> PostQueryService : createPost(userId, cmd)
@@ -19,8 +19,8 @@ activate Post
 Post --> PostQueryService : Post Created
 deactivate Post
 
-PostQueryService -> PostRepository : save(Post)
-PostRepository --> PostQueryService : PostId
+PostQueryService -> PostCommandRepository : save(Post)
+PostCommandRepository --> PostQueryService : PostId
 
 PostQueryService -> DomainEventPublisher : publish(PostCreatedEvent)
 
