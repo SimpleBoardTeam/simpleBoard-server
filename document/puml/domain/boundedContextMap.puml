@@ -3,8 +3,14 @@
 package "context map" {
     package "board context"{
         package "board"{
-            entity Board <<Aggregate Root>>{
+            abstract Board <<Aggregate Root>>{
             }
+            struct BoardName <<Value Object>>{
+            }
+            struct Creator <<Value Object>>{
+            }
+            BoardName -- Board
+            Creator -- Board
         }
 
         package "post"{
@@ -47,34 +53,51 @@ package "context map" {
     }
 
     package "member context"{
-        entity Member <<Aggregate Root>>{
+        package "member"{
+          abstract Member <<Aggregate Root>>{
+          }
+          struct NickName <<Value Object>>{
+          }
+          struct BirthYear <<Value Object>>{
+          }
+          Member -- NickName
+          Member -- BirthYear
         }
     }
 
-    package "board manager context"{
-        package "board manager"{
-            entity BoardManager <<Aggregate Root>>{
+  package "permission context" {
+        package "permission" {
+            abstract PermissionPolicy <<Aggregate Root>> {
             }
-            entity Role <<Entity>>{
-            }
-            struct Roles <<Value Object>>{
-            }
-            struct Managers <<Value Object>>{
-            }
-        }
 
-        BoardManager -- Roles
-        BoardManager -- Managers
-        Managers "1" ..> "N" Member
-        Roles "1" --> "N" Role
+            entity ManagerAssignment <<Entity>> {
+            }
+
+            struct Role <<Value Object>> {
+            }
+
+            enum RoleType {
+            }
+
+            enum Permission {
+            }
+
+            Role "1" --> "N" Permission
+
+            PermissionPolicy "1" -- "N" ManagerAssignment
+            ManagerAssignment "N" -- "1" Role
+            Role -- RoleType
+        }
     }
 
     Board <.. Post
+
     MemberPost ..> Member
     PostLike ..> Member
     MemberComment ..> Member
     Comment ..> Post
     Comment --> Comment
+    Board ..> PermissionPolicy
 
 }
 @enduml

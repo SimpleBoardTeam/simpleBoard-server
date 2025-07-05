@@ -2,13 +2,11 @@
 
 package "board context"{
 
-
     !include boardcontext/boardAggregate.puml
     !include boardcontext/postAggregate.puml
     !include boardcontext/commentAggregate.puml
 
     post.Board ..> board.Board
     comment.Post ..> post.Post
-
 }
 @enduml
