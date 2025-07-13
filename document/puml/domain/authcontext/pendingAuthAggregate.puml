@@ -1,9 +1,9 @@
 @startuml
 package "PendingAuth" {
   entity PendingAuth <<Aggregate>> {
-    + String email;
-    + String verificationCode;
-    + LocalDateTime expiresAt;
+    + String email
+    + String verificationCode
+    + LocalDateTime expiresAt
     --
     boolean isValidCode(String code)
     boolean isExpired()
