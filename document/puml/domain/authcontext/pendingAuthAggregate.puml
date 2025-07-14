@@ -3,10 +3,9 @@ package "PendingAuth" {
   entity PendingAuth <<Aggregate>> {
     + String email
     + String verificationCode
-    + LocalDateTime expiresAt
+    + Long TTL
     --
     boolean isValidCode(String code)
-    boolean isExpired()
   }
 }
 @enduml
