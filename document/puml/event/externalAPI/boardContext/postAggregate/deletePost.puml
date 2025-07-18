@@ -14,13 +14,12 @@ PostCommandController -> PostCommandService : deletePost(Visitor, postId, cmd)
 '--- Service
 PostCommandService -> PostRepository : findById(postId)
 '--- Repository
-activate Post
 PostRepository --> PostCommandService : Post
-PostCommandService -> Post : hasDeletePermission(Visitor, cmd)
+PostCommandService -> Post : deletePost(Visitor, params)
+activate Post
 
 alt Enalbe to delete
-Post --> PostCommandService : true
-PostCommandService -> Post : softDelete()
+
 PostCommandService -> PostRepository : save(Post)
 deactivate Post
 '--- Event
