@@ -1,0 +1,19 @@
+@startuml toggleLikeSeq
+title Toggle PostLike
+actor Client
+participant PostCommandController
+participant PostCommandService
+participant PostCommandRepository
+entity Post
+
+Client -> PostCommandController : PATCH /posts/{postId}/toggleLike
+PostCommandController -> PostCommandService : toggleLike(Visitor, postId)
+PostCommandService -> PostCommandRepository : findById(postId)
+PostCommandRepository --> PostCommandService : Post
+PostCommandService -> Post : toggleLike(Visitor, PostTypeEnum)
+Post --> PostCommandService : Boolean
+
+
+@enduml
+
+
