@@ -6,6 +6,7 @@ package "member" {
     +Gender gender
     +BirthYear birthYear
     +LocalDateTime signUpDate
+    +Boolean isWithdrawn
     --
     +withdraw()
     +updateNickname(String)

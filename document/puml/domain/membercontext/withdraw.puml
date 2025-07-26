@@ -2,5 +2,5 @@
 title withdraw
 
 entity Member
-Member -> Member : this.withdrawn = true
+Member -> Member : this.isWithdrawn = true
 @enduml
