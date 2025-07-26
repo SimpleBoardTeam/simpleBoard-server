@@ -8,9 +8,6 @@ participant NicknamePolicy
 Member -> Nickname : Nickname.of(newNickname, policy)
 activate Nickname
 Nickname -> NicknamePolicy : validate(newNickname)
-'NicknamePolicy -> NicknamePolicy : checkFormat()
-'NicknamePolicy -> NicknamePolicy : checkDuplicate()
-
 
 alt 유효
 NicknamePolicy --> Nickname : void
