@@ -1,0 +1,18 @@
+@startuml Sequence: issueVerifyToken
+title Sequence: issueVerifyToken
+
+actor Caller
+participant TokenDomainService
+participant ClockManager
+participant TokenTTLPolicy
+participant TokenProvider
+
+Caller -> TokenDomainService : issueVerifyToken(VerifyTokenIssueCommand)
+TokenDomainService -> ClockManager : now()
+TokenDomainService <- ClockManager : now
+TokenDomainService -> TokenTTLPolicy : verifyTtlFor(VerifyPurpose)
+TokenDomainService <- TokenTTLPolicy : TTL
+TokenDomainService -> TokenProvider : issueToken(TokenClaims)
+TokenDomainService <- TokenProvider : Token verify
+TokenDomainService --> Caller : Token verify
+@enduml

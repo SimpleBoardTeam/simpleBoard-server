@@ -1,0 +1,80 @@
+@startuml Aggregate
+title Token aggregate
+
+class TokenDomainService {
+  - TokenProvider tokenProvider
+  - TokenTTLPolicy ttlPolicy
+  - ClockManager clockManager
+  - TokenBlacklistRepository blacklistRepository
+  - MemberUUIDRepository uuidRepository
+  - String issuer
+  - String accessAudience
+  - String refreshAudience
+
+  + TokenPair issueLoginToken(LoginTokenIssueCommand)
+  + Token issueVerifyToken(VerifyTokenIssueCommand)
+  + TokenPair rotateRefreshToken(RefreshTokenRotationCommand)
+  + void enrollBlacklist(String refreshTokenRaw)
+  -- helpers --
+  - TokenClaims createAccessClaims(Long, Role, Instant)
+  - TokenClaims createRefreshClaims(Long, Role, Instant)
+  - TokenClaims createVerifyClaims(String, VerifyPurpose, Instant)
+}
+
+class Token <<Value Objects>>{
+  + String raw
+  + String tokenId
+  + String subject
+  + Instant expiredAt
+}
+class TokenPair <<Value Objects>>{
+  + Token access
+  + Token refresh
+}
+class TokenClaims <<Value Objects>>{
+  + String tokenId
+  + TokenPurpose tokenPurpose
+  + VerifyPurpose verifyPurpose
+  + String subject
+  + Role role
+  + String audience
+  + String issuer
+  + Instant issueAt
+  + Instant expiredAt
+  + boolean isExpired(Instant now)
+}
+
+interface TokenProvider <<Utility>>{
+  + Token issueToken(TokenClaims)
+  + TokenClaims verifyAndParseToken(String token)
+}
+class TokenTTLPolicy {
+  + Duration accessTtlFor(Role)
+  + Duration refreshTtlFor(Role)
+  + Duration verifyTtlFor(VerifyPurpose)
+}
+interface ClockManager <<Utility>>{
++ Instant now()
+}
+
+interface TokenBlacklistRepository <<Repository>>{
+  + void save(String tokenId, Instant exp)
+  + boolean exists(String tokenId)
+}
+interface MemberUUIDRepository <<Repository>>{
+  + String createOrGetUUID(Long memberId)
+  + Long getMemberId(String UUID)
+}
+
+' 관계
+TokenDomainService --> TokenProvider
+TokenDomainService --> TokenTTLPolicy
+TokenDomainService --> ClockManager
+TokenDomainService --> TokenBlacklistRepository
+TokenDomainService --> MemberUUIDRepository
+TokenDomainService - TokenClaims
+TokenDomainService - TokenPair
+TokenPair - Token
+
+
+@enduml

@@ -1,0 +1,24 @@
+@startuml Sequence: enrollBlacklist
+title Sequence: enrollBlacklist (or logout)
+
+actor Caller
+participant "TokenDomainService" as TDS
+participant "TokenProvider" as TP
+participant "ClockManager" as CLK
+participant "TokenBlacklistRepository" as BL
+
+Caller -> TDS : enrollBlacklist(refreshTokenRaw)
+TDS -> TP : verifyAndParseToken(refreshTokenRaw)
+TDS <- TP : TokenClaims
+
+alt claims.purpose != REFRESH
+  TDS -> Caller : throw RefreshTokenEnrollBlacklistException
+else claims.isExpired(now)
+  TDS -> CLK : now()
+  TDS <- CLK : now
+  TDS -> Caller : throw RefreshTokenInvalidException
+else ok
+  TDS -> BL : save(tokenId, expiredAt)
+  TDS --> Caller : void
+end
+@enduml
