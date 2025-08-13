@@ -6,9 +6,9 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.*;
 
 import com.simpleboard.board.auth.domain.common.vo.Role;
-import com.simpleboard.board.auth.domain.token.dto.LoginTokenIssueParam;
-import com.simpleboard.board.auth.domain.token.dto.RefreshTokenRotationParam;
-import com.simpleboard.board.auth.domain.token.dto.VerifyTokenIssueParam;
+import com.simpleboard.board.auth.domain.token.dto.request.LoginTokenIssueParam;
+import com.simpleboard.board.auth.domain.token.dto.request.RefreshTokenRotationParam;
+import com.simpleboard.board.auth.domain.token.dto.request.VerifyTokenIssueParam;
 import com.simpleboard.board.auth.domain.token.exception.RefreshTokenEnrollBlacklistException;
 import com.simpleboard.board.auth.domain.token.exception.RefreshTokenExpiredException;
 import com.simpleboard.board.auth.domain.token.exception.RefreshTokenInvalidException;
@@ -24,6 +24,7 @@ import com.simpleboard.board.auth.domain.token.vo.TokenPurpose;
 import com.simpleboard.board.auth.domain.token.vo.VerifyPurpose;
 import java.time.Duration;
 import java.time.Instant;
+import java.util.Date;
 import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
@@ -146,7 +147,7 @@ class TokenDomainServiceTest {
             .issuer("issuer")
             .build();
     when(clockManager.now()).thenReturn(now);
-    when(tokenProvider.verifyAndParseToken(oldRaw)).thenReturn(oldClaims);
+    when(tokenProvider.verifyAndParseToken(oldRaw, Date.from(now))).thenReturn(oldClaims);
     when(blacklistRepository.exists("oldId")).thenReturn(false);
     doNothing().when(blacklistRepository).save("oldId", oldClaims.expiredAt());
     when(uuidRepository.getMemberId("uuid")).thenReturn(Optional.of(99L));
@@ -196,7 +197,7 @@ class TokenDomainServiceTest {
             .expiredAt(now.plusSeconds(100))
             .build();
     when(clockManager.now()).thenReturn(now);
-    when(tokenProvider.verifyAndParseToken(oldRaw)).thenReturn(oldClaims);
+    when(tokenProvider.verifyAndParseToken(oldRaw, Date.from(now))).thenReturn(oldClaims);
 
     RefreshTokenRotationParam cmd =
         RefreshTokenRotationParam.builder().oldRefreshRaw(oldRaw).build();
@@ -221,7 +222,7 @@ class TokenDomainServiceTest {
             .expiredAt(now.minusSeconds(10))
             .build();
     when(clockManager.now()).thenReturn(now);
-    when(tokenProvider.verifyAndParseToken(oldRaw)).thenReturn(oldClaims);
+    when(tokenProvider.verifyAndParseToken(oldRaw, Date.from(now))).thenReturn(oldClaims);
 
     RefreshTokenRotationParam cmd =
         RefreshTokenRotationParam.builder().oldRefreshRaw(oldRaw).build();
@@ -246,7 +247,7 @@ class TokenDomainServiceTest {
             .expiredAt(now.plusSeconds(100))
             .build();
     when(clockManager.now()).thenReturn(now);
-    when(tokenProvider.verifyAndParseToken(oldRaw)).thenReturn(oldClaims);
+    when(tokenProvider.verifyAndParseToken(oldRaw, Date.from(now))).thenReturn(oldClaims);
     when(blacklistRepository.exists("id")).thenReturn(true);
 
     RefreshTokenRotationParam cmd =
@@ -271,8 +272,8 @@ class TokenDomainServiceTest {
             .issueAt(now.minusSeconds(1))
             .expiredAt(now.plusSeconds(100))
             .build();
-    when(tokenProvider.verifyAndParseToken(raw)).thenReturn(claims);
     when(clockManager.now()).thenReturn(now);
+    when(tokenProvider.verifyAndParseToken(raw, Date.from(now))).thenReturn(claims);
     doNothing().when(blacklistRepository).save("id", claims.expiredAt());
 
     // when
@@ -286,6 +287,7 @@ class TokenDomainServiceTest {
   @DisplayName("블랙리스트 등록 - 잘못된 목적 실패 테스트")
   void enrollBlacklist_InvalidPurpose_Fail_Test() {
     // given
+    Instant now = Instant.now();
     String raw = "raw";
     TokenClaims claims =
         TokenClaims.builder()
@@ -295,7 +297,8 @@ class TokenDomainServiceTest {
             .issueAt(Instant.now())
             .expiredAt(Instant.now().plusSeconds(100))
             .build();
-    when(tokenProvider.verifyAndParseToken(raw)).thenReturn(claims);
+    when(clockManager.now()).thenReturn(now);
+    when(tokenProvider.verifyAndParseToken(raw, Date.from(now))).thenReturn(claims);
 
     // when & then
     assertThatThrownBy(() -> service.enrollBlacklist(raw))
@@ -316,8 +319,8 @@ class TokenDomainServiceTest {
             .issueAt(now.minusSeconds(200))
             .expiredAt(now.minusSeconds(10))
             .build();
-    when(tokenProvider.verifyAndParseToken(raw)).thenReturn(claims);
     when(clockManager.now()).thenReturn(now);
+    when(tokenProvider.verifyAndParseToken(raw, Date.from(now))).thenReturn(claims);
 
     // when & then
     assertThatThrownBy(() -> service.enrollBlacklist(raw))
