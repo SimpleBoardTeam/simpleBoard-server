@@ -1,6 +1,5 @@
 package com.simpleboard.board.auth.domain.token.dto.response;
 
-import com.simpleboard.board.auth.domain.token.vo.TokenClaims;
 import com.simpleboard.board.auth.domain.token.vo.VerifyPurpose;
 import java.time.Instant;
 import lombok.Builder;
@@ -12,5 +11,4 @@ public record VerifyTokenInfo(
     String audience,
     String issuer,
     Instant issueAt,
-    Instant expiredAt) {
-}
+    Instant expiredAt) {}
