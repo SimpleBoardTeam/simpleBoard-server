@@ -1,4 +1,4 @@
-package com.simpleboard.board.auth.domain.token.dto;
+package com.simpleboard.board.auth.domain.token.dto.request;
 
 import lombok.Builder;
 
