@@ -6,6 +6,7 @@ import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
+import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 @Entity
@@ -13,7 +14,9 @@ import lombok.experimental.SuperBuilder;
 @DiscriminatorColumn(name = "COMMENT_TYPE")
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "COMMENT")
+@Table(
+    name = "COMMENT",
+    uniqueConstraints = {@UniqueConstraint(columnNames = {"PARENT_ID", "SIBLING_SEQ"})})
 @SuperBuilder
 @Getter
 public abstract class CommentEntity extends BaseEntity {
@@ -33,4 +36,6 @@ public abstract class CommentEntity extends BaseEntity {
 
   @Column(nullable = false)
   private CommentState commentState;
+
+  @Setter private Integer siblingSeq;
 }
