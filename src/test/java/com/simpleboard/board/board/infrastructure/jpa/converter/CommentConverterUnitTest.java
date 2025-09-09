@@ -87,7 +87,7 @@ class CommentConverterUnitTest {
     assertThat(entity).isInstanceOf(MemberCommentEntity.class);
     MemberCommentEntity me = (MemberCommentEntity) entity;
     assertThat(me.getId()).isEqualTo(202L);
-    assertThat(me.getParentId()).isNull();
+    assertThat(me.getParentId()).isEqualTo(0);
     assertThat(me.getPostId()).isEqualTo(33L);
     assertThat(me.getContent()).isEqualTo("member content");
     assertThat(me.getCommentState()).isEqualTo(CommentState.ACTIVATE);

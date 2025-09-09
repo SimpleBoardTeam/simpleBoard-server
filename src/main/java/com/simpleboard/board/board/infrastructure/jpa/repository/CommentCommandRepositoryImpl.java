@@ -6,6 +6,9 @@ import com.simpleboard.board.board.infrastructure.jpa.converter.CommentConverter
 import com.simpleboard.board.board.infrastructure.jpa.entity.CommentEntity;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.stereotype.Component;
 
 /**
@@ -19,13 +22,35 @@ import org.springframework.stereotype.Component;
 @RequiredArgsConstructor
 public class CommentCommandRepositoryImpl implements CommentCommandRepository {
 
+  private static final Logger log = LoggerFactory.getLogger(CommentCommandRepositoryImpl.class);
   private final CommentEntityRepository commentEntityRepository;
   private final CommentConverter converter;
 
+  private final Integer RETRY_LIMIT = 10;
+
   @Override
   public Comment save(Comment comment) {
-    CommentEntity saved = commentEntityRepository.save(converter.toJpaEntity(comment));
-    return converter.toDomainEntity(saved);
+    if (comment.getId() != null) {
+      CommentEntity saved = commentEntityRepository.save(converter.toJpaEntity(comment));
+      return converter.toDomainEntity(saved);
+    }
+    CommentEntity entity = converter.toJpaEntity(comment);
+
+    int attempt = 0;
+    while (true) {
+      try {
+        Integer lastSeq = commentEntityRepository.maxSiblingSeqByParentId(entity.getParentId());
+        lastSeq = lastSeq != null ? lastSeq : 0;
+
+        entity.setSiblingSeq(lastSeq + 1);
+
+        return converter.toDomainEntity(commentEntityRepository.save(entity));
+      } catch (DataIntegrityViolationException e) {
+        attempt++;
+        if (attempt >= RETRY_LIMIT) throw e;
+        log.info("Parent ID: {}  Attempt {}/{} failed", comment.getParentId(), attempt, RETRY_LIMIT);
+      }
+    }
   }
 
   @Override
