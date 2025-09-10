@@ -59,8 +59,10 @@ public class CommentConverter {
       MemberCommentEntity memberCommentEntity = (MemberCommentEntity) commentEntity;
       return MemberComment.builder()
           .id(commentEntity.getId())
-          .parentId((commentEntity.getParentId() == null  ||
-                  commentEntity.getParentId() == 0 )? null : commentEntity.getParentId())
+          .parentId(
+              (commentEntity.getParentId() == null || commentEntity.getParentId() == 0)
+                  ? null
+                  : commentEntity.getParentId())
           .postId(commentEntity.getPostId())
           .content(commentEntity.getContent())
           .commentState(commentEntity.getCommentState())

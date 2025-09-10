@@ -48,7 +48,8 @@ public class CommentCommandRepositoryImpl implements CommentCommandRepository {
       } catch (DataIntegrityViolationException e) {
         attempt++;
         if (attempt >= RETRY_LIMIT) throw e;
-        log.info("Parent ID: {}  Attempt {}/{} failed", comment.getParentId(), attempt, RETRY_LIMIT);
+        log.info(
+            "Parent ID: {}  Attempt {}/{} failed", comment.getParentId(), attempt, RETRY_LIMIT);
       }
     }
   }
