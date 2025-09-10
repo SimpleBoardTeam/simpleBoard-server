@@ -12,4 +12,4 @@ import lombok.Builder;
  * @domain request-dto
  */
 @Builder
-public record CommentListQueryForm() {}
+public record CommentListQueryForm(int page, int size) {}
