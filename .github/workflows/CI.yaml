@@ -6,6 +6,7 @@ on:
       - develop
       - main
       - release/**
+      - feat/*/#*
   workflow_dispatch:
     inputs:
       regenerate_svg:
