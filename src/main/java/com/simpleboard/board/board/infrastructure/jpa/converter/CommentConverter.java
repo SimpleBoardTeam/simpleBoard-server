@@ -16,7 +16,7 @@ public class CommentConverter {
       GuestComment guestComment = (GuestComment) comment;
       return GuestCommentEntity.builder()
           .id(comment.getId())
-          .parentId(comment.getParentId())
+          .parentId(comment.getParentId() == null ? 0L : comment.getParentId())
           .postId(comment.getPostId())
           .content(comment.getContent())
           .commentState(comment.getCommentState())
@@ -29,7 +29,7 @@ public class CommentConverter {
       MemberComment memberComment = (MemberComment) comment;
       return MemberCommentEntity.builder()
           .id(comment.getId())
-          .parentId(comment.getParentId())
+          .parentId(comment.getParentId() == null ? 0L : comment.getParentId())
           .postId(comment.getPostId())
           .content(comment.getContent())
           .commentState(comment.getCommentState())
@@ -46,7 +46,7 @@ public class CommentConverter {
       GuestCommentEntity guestCommentEntity = (GuestCommentEntity) commentEntity;
       return GuestComment.builder()
           .id(commentEntity.getId())
-          .parentId(commentEntity.getParentId())
+          .parentId(commentEntity.getParentId() == 0 ? null : commentEntity.getParentId())
           .postId(commentEntity.getPostId())
           .content(commentEntity.getContent())
           .commentState(commentEntity.getCommentState())
@@ -59,7 +59,10 @@ public class CommentConverter {
       MemberCommentEntity memberCommentEntity = (MemberCommentEntity) commentEntity;
       return MemberComment.builder()
           .id(commentEntity.getId())
-          .parentId(commentEntity.getParentId())
+          .parentId(
+              (commentEntity.getParentId() == null || commentEntity.getParentId() == 0)
+                  ? null
+                  : commentEntity.getParentId())
           .postId(commentEntity.getPostId())
           .content(commentEntity.getContent())
           .commentState(commentEntity.getCommentState())
