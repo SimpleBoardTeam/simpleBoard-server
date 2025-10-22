@@ -10,4 +10,4 @@ import lombok.Builder;
  * @domain request-dto
  */
 @Builder
-public record CommentListQuery() {}
+public record CommentListQuery(Long postId, int page, int size) {}
