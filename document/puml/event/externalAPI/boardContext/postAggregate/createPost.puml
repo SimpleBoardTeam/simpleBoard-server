@@ -14,7 +14,7 @@ PostController -> PostQueryService : createPost(userId, cmd)
 PostQueryService -> BoardQueryRepository : findIdByBoardName(bname)
 BoardQueryRepository --> PostQueryService : boardId
 
-PostQueryService -> Post : Post.write(cmd, boardId)
+PostQueryService -> Post : Post.write(params)
 activate Post
 Post --> PostQueryService : Post Created
 deactivate Post
