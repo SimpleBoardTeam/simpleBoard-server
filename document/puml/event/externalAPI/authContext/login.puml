@@ -1,0 +1,44 @@
+@startuml
+
+actor User
+participant AuthFilter
+participant AuthController
+participant AuthCommandService
+participant TokenDomainService
+participant AuthQueryRepository
+entity Auth
+
+== Log In ==
+User -> AuthFilter : POST /login\n (email, password)
+AuthFilter -> AuthCommandService : login(email, password)
+AuthCommandService -> AuthQueryRepository : findByEmail(email)
+AuthQueryRepository --> AuthCommandService : Auth
+AuthCommandService -> Auth : checkPassword(password)
+activate Auth
+alt Password not match
+Auth --> User : PasswordNotMatchException
+end
+Auth --> AuthCommandService : LoginInfo
+AuthCommandService -> TokenDomainService : issueLoginToken(Command)
+TokenDomainService --> AuthCommandService : TokenPair
+AuthCommandService --> AuthFilter : TokenPair
+AuthFilter --> User : 201\n Cookie: TokenPair
+
+
+
+== Rotation ==
+User -> AuthController : POST /auth/token/refresh (refreshToken)
+AuthController -> AuthCommandService : rotateRefreshToken(Command)
+AuthCommandService -> TokenDomainService : rotateRefreshToken(Command)
+TokenDomainService --> AuthCommandService : TokenPair
+AuthCommandService --> AuthController : TokenResult
+
+== Logout ==
+User -> AuthController : POST /auth/logout (refreshToken)
+AuthController -> AuthCommandService : revoke(refreshToken)
+AuthCommandService -> TokenDomainService : enrollBlacklist(token)
+TokenDomainService --> AuthCommandService : Void
+AuthCommandService --> AuthController : Void
+AuthController --> User : 204
+
+@enduml

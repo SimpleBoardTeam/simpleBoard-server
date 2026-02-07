@@ -1,0 +1,77 @@
+@startuml
+title Email Member register
+
+actor User
+participant AuthController
+participant AuthCommandService
+participant EmailDomainService
+participant AuthRepository
+participant TokenDomainService
+entity Auth
+participant DomainEventPublisher #skyblue
+participant ExternalPort #greenyellow
+
+== Send email ==
+User -> AuthController : POST /auth/register/email/sendCode (email)
+AuthController -> AuthCommandService : sendRegisterEmail(email)
+AuthCommandService -> AuthRepository : existByEmail(email)
+alt email exist
+AuthRepository --> AuthCommandService : true
+EmailDomainService --> User : 409 EmailExistException
+end
+AuthRepository --> AuthCommandService : false
+AuthCommandService -> EmailDomainService : sendRegisterEmail(email)
+EmailDomainService --> AuthCommandService : Void
+AuthCommandService --> AuthController : Void
+AuthController --> User : 200
+
+== Check email ==
+User -> AuthController : POST /auth/register/email/checkCode\n (email, code)
+AuthController -> AuthCommandService : checkEmailCode(email, code)
+AuthCommandService -> EmailDomainService : checkEmailCode(email, code)
+alt wrong code
+EmailDomainService --> User : 400 EmailCodeException
+end
+EmailDomainService -> TokenDomainService : issueVerifyToken(email)
+TokenDomainService --> EmailDomainService : Token
+EmailDomainService --> AuthCommandService : Token
+AuthCommandService --> AuthController : Token
+AuthController --> User : 200\nCookie: EmailVerifyToken
+
+== Check Nickname ==
+
+User -> AuthController : POST /auth/register/nickname\n (nickname)
+AuthController -> AuthCommandService : checkNickname(nickname)
+AuthCommandService -> ExternalPort :  checkNickname(nickname)
+alt if used
+ExternalPort --> AuthCommandService : Used
+AuthCommandService --> User : NicknameExistException
+else not used
+ExternalPort --> AuthCommandService : Avaliable
+AuthCommandService -> TokenDomainService : issueVerifyToken(email)
+TokenDomainService --> AuthCommandService : Token
+AuthCommandService --> AuthController : Token
+AuthController --> User : 200\nCookie: Token
+end
+
+'1. 유저가 닉네임 검증 요청 전송
+'2. member에서 닉네임이 사용중인지 체크 -> RDB와 임시 저장소 모두 체크
+'3. 닉네임이 미사용중이라면, 해당 닉네임을 임시 저장소에 락 걸어놓고(TTL 필수), JWT에 닉네임을 넣어 반환
+'4. 다음 요청때 JWT 내의 닉네임과 요청 닉네임이 같다면 사용 가능 판정, 임시 저장소에 닉네임 락 만료시키기
+
+== Register Member ==
+User -> AuthController : POST /auth/register/email\n(gender, password, birthYear)\nemailToken, nicknameToken
+AuthController -> AuthCommandService : register(MemberRegisterCommand)
+AuthCommandService -> TokenDomainService : parseToken(EmailToken, NicknameToken)
+TokenDomainService --> AuthCommandService : email, nickname
+AuthCommandService ->  Auth : register(Command)
+Auth --> AuthCommandService : Auth
+AuthCommandService -> AuthRepository : save(Auth)
+AuthRepository --> AuthCommandService : AuthId
+AuthCommandService -> DomainEventPublisher : MemberRegisterEvent
+AuthCommandService -> TokenDomainService : issueLoginToken(Command)
+TokenDomainService --> AuthCommandService : TokenPair
+AuthCommandService --> AuthController : RegisterTokenResult
+AuthController --> User : 201\nCookie: TokenPair
+
+@enduml

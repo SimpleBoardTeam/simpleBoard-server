@@ -1,0 +1,30 @@
+@startuml Sequence: issueLoginToken (stateless)
+title Sequence: issueLoginToken (stateless)
+
+actor Caller
+participant TokenDomainService
+participant ClockManager
+participant MemberUUIDRepository
+participant TokenTTLPolicy
+participant TokenProvider
+
+Caller -> TokenDomainService : issueLoginToken(LoginTokenIssueCommand{memberId, role})
+TokenDomainService -> ClockManager : now()
+TokenDomainService <- ClockManager : now
+TokenDomainService -> MemberUUIDRepository : createOrGetUUID(memberId)
+TokenDomainService <- MemberUUIDRepository : UUID
+
+' Access claims
+TokenDomainService -> TokenTTLPolicy : accessTtlFor(Role)
+TokenDomainService <- TokenTTLPolicy : TTL
+TokenDomainService -> TokenProvider : issueToken(TokenClaims access)
+TokenDomainService <- TokenProvider : Token access
+
+' Refresh claims
+TokenDomainService -> TokenTTLPolicy : refreshTtlFor(Role)
+TokenDomainService <- TokenTTLPolicy : TTL
+TokenDomainService -> TokenProvider : issueToken(TokenClaims refresh)
+TokenDomainService <- TokenProvider : Token refresh
+
+TokenDomainService --> Caller : TokenPair{access, refresh}
+@enduml

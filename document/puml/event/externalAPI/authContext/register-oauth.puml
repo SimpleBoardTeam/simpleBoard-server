@@ -1,0 +1,56 @@
+title Sequence: OAuth2 (Google/Kakao) Login & Link
+@startuml
+
+actor User
+participant OAuth2Filter
+participant AuthController
+participant OAuth2AppService
+participant TokenDomainService
+participant AuthRepository
+participant AuthTemporaryRepository
+entity Auth
+participant DomainEventPublisher #skyblue
+
+== Redirect ==
+User -> OAuth2Filter : GET /oauth2/authorization/{provider}
+OAuth2Filter --> User : 302 to Provider AuthZ URL
+
+== Callback ==
+User -> OAuth2Filter : GET /callback/{provider}?code=...
+OAuth2Filter -> OAuth2AppService : Oauth2AuthCommand
+OAuth2AppService -> AuthRepository: existByAuthId
+alt exist
+AuthRepository --> OAuth2AppService: true
+OAuth2AppService -> TokenDomainService: issueLoginToken(TokenCreateCommand)
+TokenDomainService --> OAuth2AppService: TokenPair
+OAuth2AppService --> OAuth2Filter : OAuth2AuthResult
+OAuth2Filter --> User: 302 main page\nCookie:JWT(access, refresh)
+else not exist
+AuthRepository --> OAuth2AppService: false
+OAuth2AppService -> AuthTemporaryRepository : save(key, UserInfo)
+OAuth2AppService -> TokenDomainService : issueVerifyToken(key)
+TokenDomainService --> OAuth2AppService : Token
+OAuth2AppService --> OAuth2Filter : OAuth2AuthResult
+OAuth2Filter --> User: 302 register page\nCookie:Token(key)
+end
+
+== Register ==
+User -> AuthController : POST /auth/register/email\nnicknameToken, keyToken
+AuthController -> OAuth2AppService : register(MemberRegisterCommand)
+OAuth2AppService -> TokenDomainService : parseToken(keyToken, NicknameToken)
+TokenDomainService --> OAuth2AppService : key, nickname
+OAuth2AppService -> AuthTemporaryRepository : findByKey(key)
+AuthTemporaryRepository --> OAuth2AppService : TmpAuthInfo
+OAuth2AppService -> Auth: register(RegisterParams)
+Auth --> OAuth2AppService: Auth
+OAuth2AppService -> AuthRepository : Auth
+OAuth2AppService -> DomainEventPublisher: OAuthUserRegisterEvent
+OAuth2AppService -> TokenDomainService: issueLoginToken(TokenCreateCommand)
+TokenDomainService --> OAuth2AppService: TokenPair
+OAuth2AppService --> AuthController: OAuth2AuthResult
+AuthController --> User: 201\nCookie:JWT
+
+== Register with nickname ==
+
+
+@enduml
