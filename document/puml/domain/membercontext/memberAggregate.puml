@@ -6,10 +6,10 @@ package "member" {
     +Gender gender
     +BirthYear birthYear
     +LocalDateTime signUpDate
+    +Boolean isWithdrawn
     --
-    +create()
     +withdraw()
-    +updateNickname(String) : nickname.updateNickname(String)
+    +updateNickname(String)
 }
 
 enum Gender {
@@ -20,18 +20,22 @@ enum Gender {
 class Nickname <<Value Object>> {
     +String : nickname
     --
-    +validate()
-    +updateNickname(newNickname : String) : Nickname
+    +Nickname : static of(String, NicknamePolicy)
 }
 
+class NicknamePolicy <<Policy>> {
+  + checkFormat()
+  + checkDuplicate()
+}
 class BirthYear <<Value Object>> {
     +String : birthYear
     --
-    +validate()
+    +validate(String)
 }
 
 Member -- Gender
 Member -- Nickname
 Member -- BirthYear
+Nickname -- NicknamePolicy
 }
 @enduml

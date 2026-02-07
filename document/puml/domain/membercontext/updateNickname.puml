@@ -1,0 +1,20 @@
+@startuml
+title updateNickname
+
+entity Member
+participant Nickname
+participant NicknamePolicy
+
+Member -> Nickname : Nickname.of(newNickname, policy)
+activate Nickname
+Nickname -> NicknamePolicy : validate(newNickname)
+
+alt 유효
+NicknamePolicy --> Nickname : void
+deactivate Nickname
+Nickname --> Member : new Nickname
+Member -> Member : changeNickname(new Nickname)
+else 유효하지 않음
+NicknamePolicy --> Member : throw Exception
+end
+@enduml

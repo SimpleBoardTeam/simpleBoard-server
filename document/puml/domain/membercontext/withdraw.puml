@@ -1,0 +1,6 @@
+@startuml
+title withdraw
+
+entity Member
+Member -> Member : this.isWithdrawn = true
+@enduml
